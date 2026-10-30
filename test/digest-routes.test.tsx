@@ -20,8 +20,9 @@ function app() {
 }
 
 function tableRows(html: string): string[][] {
-  return [...html.matchAll(/<tr\b[^>]*>(.*?)<\/tr>/gs)].map(([, row]) =>
-    [...row.matchAll(/<td\b[^>]*>(.*?)<\/td>/gs)].map(([, cell]) =>
+  const body = /<tbody\b[^>]*>(.*?)<\/tbody>/s.exec(html)?.[1] ?? '';
+  return [...body.matchAll(/<tr\b[^>]*>(.*?)<\/tr>/gs)].map(([, row]) =>
+    [...row.matchAll(/<(?:th|td)\b[^>]*>(.*?)<\/(?:th|td)>/gs)].map(([, cell]) =>
       cell.replace(/<[^>]*>/g, '').replace(/&mdash;/g, '—').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"),
     ),
   );
@@ -39,11 +40,12 @@ describe('digest routes', () => {
   it('returns matching sorted jobs and values in HTML and JSON, including retry and failure warnings', async () => {
     const night = '2026-10-27';
     const first = '2026-10-27T23:58:00-07:00';
-    const latest = '2026-10-28T00:03:00+02:00';
+    const latest = '2026-10-28T01:03:00-07:00';
     const lines = [
       event(first, 'zeta', 'retry', null),
       event('2026-10-27T23:59:00-07:00', 'amber', 'fail', 'owner <ops>', 'bad <state> & "quoted"'),
       event('2026-10-27T23:59:30-07:00', 'zeta', 'retry', 'worker'),
+      event('2026-10-27T23:59:45-07:00', 'zeta', 'retry', 'worker'),
       event('2026-10-28T00:00:00-07:00', 'zeta', 'fail', 'worker', 'transient'),
       event(latest, 'zeta', 'ok', 'worker'),
       event('2026-10-28T10:04:00+02:00', 'amber', 'ok', null),
@@ -68,7 +70,7 @@ describe('digest routes', () => {
     expect(pageResponse.status).toBe(200);
     expect(data.kind).toBe('found');
     expect(data.malformedLines).toBe(1);
-    expect(data.counts).toEqual({ ok: 2, retry: 3, fail: 1 });
+    expect(data.counts).toEqual({ ok: 2, retry: 3, fail: 2 });
     expect(data.rows.map(({ job }) => job)).toEqual(['amber', 'zeta']);
     expect(data.rows).toEqual([
       {
@@ -77,20 +79,20 @@ describe('digest routes', () => {
         firstAt: '2026-10-27T23:59:00-07:00', lastAt: '2026-10-28T10:04:00+02:00',
       },
       {
-        job: 'zeta', owner: 'worker', runs: 4, retries: 3, lastStatus: 'ok',
+        job: 'zeta', owner: 'worker', runs: 5, retries: 3, lastStatus: 'ok',
         lastError: 'transient', hasFailure: true, firstAt: first, lastAt: latest,
       },
     ]);
 
     const rows = tableRows(html);
-    expect(rows.map((row) => row[0])).toEqual(['amber', 'zeta']);
-    expect(rows[0]).toContain('—');
-    expect(rows[1]).toContain('3');
-    expect(html).toMatch(/class="[^"]*warn|class="warn/);
+    expect(rows).toEqual([
+      ['amber', '—', '2', '0', 'ok', 'bad <state> & "quoted"', '2026-10-27T23:59:00-07:00', '2026-10-28T10:04:00+02:00', 'failed at least once'],
+      ['zeta', 'worker', '5', '3', 'ok', 'transient', first, latest, '3 retries; failed at least once'],
+    ]);
     expect(html).toContain('2026-10-27T23:59:00-07:00');
     expect(html).toContain('2026-10-28T10:04:00+02:00');
     expect(html).toContain('2026-10-27T23:58:00-07:00');
-    expect(html).toContain('2026-10-28T00:03:00+02:00');
+    expect(html).toContain('2026-10-28T01:03:00-07:00');
     expect(html).toContain('bad &lt;state&gt; &amp; &quot;quoted&quot;');
     expect(html).not.toContain('<state>');
   });
