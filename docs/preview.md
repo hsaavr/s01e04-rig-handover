@@ -37,8 +37,10 @@ publishes directly to production without Git, a CLI, or a GitHub workflow.
 Record the project's actual **production domain** from Vercel. Verify that HTTPS URL
 opens without the owner's login and renders the digest and initial banner. Give the
 reviewer this stable production URL and the plan's actual issue links through the
-documented submission route. Keep delivery evidence privately before closing #7.
-Also record the initial deployment ID and its unique URL privately for cleanup.
+documented submission route. Keep delivery evidence privately. Leave #7 open until
+the reviewer confirms looking at the preview; sending the link alone is not enough.
+Preserve the reviewer confirmation privately before closing #7. Also record the
+initial deployment ID and its unique URL privately for cleanup.
 
 Use the production domain for review: it will point to the replacement deployment.
 A unique deployment URL continues to identify an individual version.
@@ -57,17 +59,16 @@ This uses the default lane ID; export `LANE_ID` first if your configured lane di
 Repeat the same `curl` command to overwrite the local `index.html`. Inspect it and
 confirm the banner reads **no marker set**.
 
-Open the **existing `s01e04-rig-preview` project dashboard** in the same HS team and
-drop the isolated folder containing only the replacement `index.html` onto it.
-Do not use `/new` or `/drop` for replacement: those create another project. Verify
-the same production URL now renders the marker-free page.
+Open Vercel's `/new` page and use its file/folder picker to select the isolated
+replacement. Choose **Deploy to an existing project instead**. In the update form,
+select HS Hobby (`hs-d827`), the existing `s01e04-rig-preview` project, and
+**Production**, then choose **Deploy to s01e04-rig-preview**. Existing-project mode
+replaces that project's production deployment; new-project mode creates another
+project. Verify the same production URL now renders the marker-free page.
 
-Replacing production does not remove the earlier deployment. Within the approved
-cleanup scope, use the project's Deployments list to delete the specific recorded
-marker-bearing deployment, retaining the clean deployment and project. Verify its
-old unique URL no longer serves the marker, then recheck the stable production URL.
-Do not rely on automatic retention for timely removal; deletion also removes that
-version's rollback availability.
+Replacing production does not remove the earlier deployment. The plan requires the
+same public preview URL to serve the marker-free replacement. Deleting an earlier
+deployment is a separate action and requires its own approval.
 
 See Vercel's [Drop instructions](https://vercel.com/docs/drop),
 [generated URL documentation](https://vercel.com/docs/deployments/generated-urls), and

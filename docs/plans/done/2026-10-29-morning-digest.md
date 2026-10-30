@@ -1,8 +1,9 @@
 ---
 plan: morning-digest
-status: ready
+status: done
 owner: rook
 opened: 2026-10-29
+closed: 2026-10-29
 ---
 
 # Morning digest
@@ -77,3 +78,37 @@ page again with `LANE_MARKER` unset (the banner reads "no marker set") and uploa
 link. Move this plan to `docs/plans/done/` with its issue list.
 
 Done when: the preview link no longer shows the lane marker.
+
+## Issues
+
+| Issue | Plan requirement | Requirement status |
+|---|---|---|
+| [#1 — Define digest types and reader contract](https://github.com/hsaavr/s01e04-rig-handover/issues/1) | 1 — types and reader contract | Complete |
+| [#2 — Read and aggregate nightly run logs](https://github.com/hsaavr/s01e04-rig-handover/issues/2) | 1 — run log reader | Complete |
+| [#3 — Render the nightly digest HTML page](https://github.com/hsaavr/s01e04-rig-handover/issues/3) | 2a — digest page | Complete |
+| [#4 — Serve nightly digest JSON](https://github.com/hsaavr/s01e04-rig-handover/issues/4) | 2b — JSON | Complete |
+| [#5 — Link status-board nights to digests with event counts](https://github.com/hsaavr/s01e04-rig-handover/issues/5) | 2c — board links | Complete |
+| [#6 — Test digest HTML and JSON routes](https://github.com/hsaavr/s01e04-rig-handover/issues/6) | 2d — route tests | Complete |
+| [#7 — Publish digest HTML preview and submit for review](https://github.com/hsaavr/s01e04-rig-handover/issues/7) | 3 — preview review | Complete |
+| [#8 — Remove preview marker after review and archive plan](https://github.com/hsaavr/s01e04-rig-handover/issues/8) | 4 — cleanup and archive | Complete |
+
+## Completion record
+
+The reader and routes passed 18 tests and typecheck; the run fixtures remained unchanged.
+Both nights linked from the status board rendered in the browser. The page and JSON
+used the same sorted reader output.
+
+The reviewer confirmed seeing the preview on 2026-10-29 at 23:38 (America/Mazatlan,
+UTC−07:00). Delivery alone did not
+complete the review requirement; #7 requires reviewer confirmation before closure.
+
+After renewed human approval, the digest was exported with `LANE_MARKER` unset and
+uploaded over the same [public preview URL](https://s01e04-rig-preview.vercel.app/).
+A fresh browser inspection on 2026-10-29 at 23:45 (America/Mazatlan, UTC−07:00)
+confirmed **no marker set**,
+five sorted jobs, and the original malformed-line, retry, and failure warnings.
+An anonymous HTTP check at 23:46 in the same zone returned 200 with bytes matching the clean
+export. Verification evidence is retained privately.
+
+This archive records completed requirements; GitHub issue state is tracked in the
+linked issues.
